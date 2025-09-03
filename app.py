@@ -4,35 +4,36 @@ import re
 import numpy as np
 import pandas as pd
 import joblib
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
+
+app = Flask(__name__)
 
 # ——————————————
-# 1. FLASK SETUP TO SERVE STATIC UI
+# 1. SERVE ROOT-LEVEL STATIC FILES
 # ——————————————
 
-# Static folder holds index.html, style.css, script.js
-app = Flask(
-    __name__,
-    static_folder="static",   # where your HTML/CSS/JS live
-    static_url_path=""        # serve them at root: /index.html, /style.css, etc.
-)
-
-# Root serves index.html
 @app.route("/")
 def home():
-    return app.send_static_file("index.html")
+    # serve index.html from project root
+    return send_from_directory(os.getcwd(), "index.html")
+
+@app.route("/style.css")
+def css():
+    return send_from_directory(os.getcwd(), "style.css", mimetype="text/css")
+
+@app.route("/script.js")
+def js():
+    return send_from_directory(os.getcwd(), "script.js", mimetype="application/javascript")
 
 
 # ——————————————
 # 2. LOAD DATA & PREPROCESSOR
 # ——————————————
 
-# 2.1 Raw data for names & features
 with open("Final Dataset 320 json.json", "r", encoding="utf-8") as f:
     data = json.load(f)
 df = pd.DataFrame(data)
 
-# 2.2 Feature engineering
 def parse_quantity(q):
     if not isinstance(q, str):
         return np.nan
@@ -52,7 +53,6 @@ NUM_COLS = [
 ]
 CAT_COLS = ["Allergy"]
 
-# 2.3 Load preprocessor & transform
 preprocessor = joblib.load("preprocessor_hyper_pr.pkl")
 X_all = preprocessor.transform(df[NUM_COLS + CAT_COLS])
 
@@ -60,6 +60,7 @@ X_all = preprocessor.transform(df[NUM_COLS + CAT_COLS])
 # ——————————————
 # 3. LOAD ENSEMBLE MODELS + THRESHOLDS
 # ——————————————
+
 ensembles = {}
 for lbl in df["Label"].unique():
     ensembles[lbl] = joblib.load(f"ensemble_{lbl}.pkl")
@@ -123,7 +124,6 @@ def get_suggestions(cats, top_n, flt=None):
         ens = ensembles[cat]
         thr = ens["threshold"]
 
-        # avg the sub-model probabilities
         probas = [
             m.predict_proba(X_all)[:,1]
             for key,m in ens.items() if key.endswith("_model")
@@ -192,5 +192,5 @@ def recommend():
 # ——————————————
 
 if __name__ == "__main__":
-    # dev server
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)

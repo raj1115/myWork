@@ -1,0 +1,9 @@
+Flask
+gunicorn
+numpy
+pandas
+scikit-learn==1.5.1
+imbalanced-learn
+joblib
+requests
+xgboost   # only if you installed it

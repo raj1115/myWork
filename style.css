@@ -1,0 +1,71 @@
+/*--- Base styles (yours) ---*/
+body {
+  background: #f7f9fc;
+  color: #333;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.navbar-brand {
+  font-weight: 600;
+  font-size: 1.5rem;
+}
+
+.card {
+  border-radius: 0.5rem;
+}
+
+#results .card {
+  background: #fff;
+}
+
+.list-group-item {
+  border: none;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/*--- Enhancements ---*/
+
+/* Smooth collapse/expand animation for the extra questions panel */
+#extra-questions {
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+}
+#extra-questions.d-none {
+  /* when .d-none is applied JS-side, we're collapsed */
+}
+#extra-questions.d-none ~ form#recommendation-form button[type="submit"] {
+  /* no-op */
+}
+#extra-questions:not(.d-none) {
+  /* when JS removes the .d-none class, reveal it */
+  max-height: 500px;    /* big enough to show full content */
+  opacity: 1;
+}
+
+/* Give a little breathing room between list items */
+#initial-list li,
+#refined-list li {
+  padding: 0.5rem 0;
+  font-size: 1.1rem;
+}
+
+/* Highlight refined section header when visible */
+#refined-results:not(.d-none) {
+  border-left: 4px solid #0d6efd;
+}
+
+/* Disabled submit button styling when waiting for response */
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Toast-style warning for allergies or high-sodium picks */
+.toast-warning {
+  border-left: 4px solid #ffc107;
+  background: #fff8e1;
+  color: #856404;
+}
